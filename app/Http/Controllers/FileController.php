@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\File;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class FileController extends Controller
@@ -28,9 +29,18 @@ class FileController extends Controller
 
     public function file(File $file)
     {
-
+        $file->incrementViews();
         return view('file.files', [
             'file' => $file
         ]);
+    }
+
+    public function download(File $file)
+    {
+        $header = [
+            'Content-Disposition' => 'attachment; filename="'.$file->filename.'"'
+        ];
+
+        return Storage::download('/public/', $file->filename);
     }
 }
