@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\File;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -27,6 +28,15 @@ class FileController extends Controller
         return redirect()->route('file', [$file->id]);
     }
 
+    public function fileIndex()
+    {
+        $files = File::all();
+
+        return \response()->view('file.index',[
+            'files' => $files
+        ]);
+    }
+
     public function file(File $file)
     {
         $file->incrementViews();
@@ -41,6 +51,6 @@ class FileController extends Controller
             'Content-Disposition' => 'attachment; filename="'.$file->filename.'"'
         ];
 
-        return Storage::download('/public/', $file->filename);
+        return Response::make(Storage::disk('storage')->get($file->filename), 200, $header);
     }
 }
