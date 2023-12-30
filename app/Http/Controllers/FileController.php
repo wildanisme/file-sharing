@@ -2,25 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class FileController extends Controller
 {
-    public function upload(Request $request)
+    public function upload(Request $request, File $file)
     {
 
-        $validator = Validator::make($request->all(),[
-            'filename'  => 'string',
-            'file'      => 'file'
-        ]);
-
         $path = 'public/';
-        $file = $request->file('file');
-        $extension = $file->getClientOriginalExtension();
-        $filename = time() . '-' .  $file->getClientOriginalName();
-        $file->storeAs($path, $filename);
+        $requestFile = $request->file('file');
+        $extension = $requestFile->getClientOriginalExtension();
+        $filename = time() . '-' .  $requestFile->getClientOriginalName();
+        $requestFile->storeAs($path, $filename);
 
-        return redirect('/home')->with('success','Data berhasil diupload');
+        // Insert into table 'file'
+        $file->filename     = $filename;
+        $file->views        = 0;
+        $file->downloads    = 0;
+        $file->save();
+
+        return redirect()->route('file', [$file->id]);
+    }
+
+    public function file(File $file)
+    {
+
+        return view('file.files', [
+            'file' => $file
+        ]);
     }
 }
